@@ -1,29 +1,16 @@
 # Project 2 — Exploratory Data Analysis
 
-This is the second project I completed as part of the **DecodeLabs Data Analytics Industrial Training Program – Batch 2026**.
+This is the second project I completed as part of the **DecodeLabs Data Analytics Industrial Training Program — Batch 2026**.
 
-In this project, I explored the e-commerce dataset to understand how the data was distributed, how different products performed, how order values changed over time, and whether there were any noticeable patterns or unusual values.
+For this project, I explored an e-commerce dataset to understand what was happening in the orders before moving on to deeper analysis.
 
-The main focus was not just creating charts, but trying to understand what the numbers were saying.
-
-## Objective
-
-The main objectives of this project were to:
-
-- Understand the structure of the dataset
-- Calculate basic descriptive statistics
-- Study the distribution of important numerical variables
-- Compare products and their performance
-- Analyze order trends over time
-- Identify unusual values and outliers
-- Study relationships between numerical variables
-- Compare different groups in the dataset
-- Find useful observations from the analysis
-- Convert the findings into simple business recommendations
+I looked at distributions, product performance, trends, outliers, correlations and differences between groups. The main goal was not just to create charts, but to ask **"What does this actually tell us?"**
 
 ## Dataset
 
-The dataset contains e-commerce order information including:
+The dataset contains **1,200 e-commerce orders and 14 columns**, covering the period from **January 2023 to June 2025**.
+
+Some of the main columns are:
 
 - Order ID
 - Date
@@ -34,15 +21,13 @@ The dataset contains e-commerce order information including:
 - Total Price
 - Payment Method
 - Order Status
-- Tracking Number
 - Items in Cart
 - Coupon Code
 - Referral Source
 - Shipping Address
+- Tracking Number
 
-The dataset contains **1,200 orders** across **7 products**.
-
-The cleaned dataset from Project 1 was used as the starting point for this analysis.
+The cleaned dataset from **Project 1** was used as the starting point for this analysis.
 
 ## Tools Used
 
@@ -51,142 +36,212 @@ The cleaned dataset from Project 1 was used as the starting point for this analy
 - NumPy
 - Matplotlib
 - Seaborn
+- SciPy
 - Jupyter Notebook
 
-## Analysis Performed
+## What I Did
 
-### 1. Descriptive Statistics
+### 1. Data Understanding and Quality Checks
 
-I calculated basic statistics such as:
+I started by checking the structure of the dataset, data types, missing values and duplicates.
+
+There were **309 blank CouponCode values**. Instead of treating these as missing information, I interpreted them as orders where no coupon was used and labelled them as `No Coupon`.
+
+After this:
+
+- No missing values remained
+- No duplicate rows were found
+- No duplicate Order IDs were found
+- `TotalPrice = Quantity × UnitPrice` for every order
+- `ItemsInCart >= Quantity` for every order
+
+These checks were important because some of the relationships found later are directly affected by how these columns are defined.
+
+## 2. Descriptive Statistics
+
+I calculated statistics such as:
 
 - Count
 - Mean
 - Median
 - Minimum
 - Maximum
-- Standard deviation
 - Quartiles
+- Standard deviation
+- Skewness
 
-These helped me understand the general characteristics of the numerical columns.
+One of the main observations was that `TotalPrice` is right-skewed.
 
-### 2. Distribution Analysis
+The:
 
-I looked at the distributions of important numerical variables such as:
+- Mean order value was about **₹1,054**
+- Median order value was about **₹824**
+
+This means the average is being pulled upward by higher-value orders, so the median gives a better idea of what a typical order looks like.
+
+## 3. Distribution Analysis
+
+I used histograms to look at:
 
 - Quantity
 - Unit Price
-- Total Price
 - Items in Cart
+- Total Price
 
-This helped identify how the values were spread and whether they were skewed.
+Quantity and cart size were fairly evenly distributed, while Total Price had a noticeable right tail.
 
-### 3. Product Analysis
+One useful thing I found here was that the TotalPrice distribution is partly explained by the way the data is constructed:
 
-I compared the products based on:
+`TotalPrice = Quantity × UnitPrice`
 
-- Number of orders
-- Total order value
-- Average order value
-- Order contribution
+So the strong relationships between these variables should not automatically be treated as a business discovery.
 
-This helped identify which products were contributing more to the overall order value.
+## 4. Categorical Analysis
 
-### 4. Order Status Analysis
+I compared the distribution of:
 
-I compared the different order statuses to understand how orders were distributed across:
+- Products
+- Payment Methods
+- Order Status
+- Coupon Codes
+- Referral Sources
 
-- Delivered
-- Shipped
-- Pending
-- Cancelled
-- Returned
+Most categories were fairly evenly distributed.
 
-This also helped identify the importance of cancelled and returned orders in the dataset.
+The main exception was Order Status:
 
-### 5. Monthly Trend Analysis
+**Cancelled + Returned orders made up 41.4% of all orders.**
 
-I grouped the data by month to see how order value changed over time.
+That became one of the main areas I looked at more closely later in the analysis.
 
-The analysis helped identify stronger and weaker periods and provided a better understanding of the overall trend in the dataset.
+## 5. Time Analysis
 
-### 6. Outlier Analysis
+I grouped the orders by month and looked at both order count and order value.
 
-I used the **Interquartile Range (IQR)** method to identify potential outliers.
+Some of the main observations were:
 
-The outliers were then reviewed rather than automatically removed. Values that represented legitimate orders were retained because an unusual value does not necessarily mean that the data is incorrect.
+- June was the strongest month in the dataset.
+- January–June contributed around **61% of total order value**.
+- The second half of the year was generally weaker.
+- Comparing January–June across years showed that H1 order value declined from roughly **₹286k in 2023 → ₹257k in 2024 → ₹232k in 2025**.
 
-### 7. Correlation Analysis
+Since 2025 only contains data up to June, I compared January–June across the years instead of comparing incomplete 2025 data with full-year figures.
 
-I checked the relationships between numerical variables to understand how they were related.
+With only about 2.5 years of data, I treat this as a pattern worth investigating rather than calling it a confirmed seasonal cycle.
 
-Some of the relationships observed included:
+## 6. Outlier Analysis
 
-- Unit Price and Total Price
-- Quantity and Total Price
-- Items in Cart and Total Price
-- Quantity and Items in Cart
+I used the **IQR method** to identify unusually high-value orders.
 
-### 8. Group Comparisons
+There were **8 high-value outliers** above the upper IQR limit.
 
-I compared order values across different groups in the dataset to understand whether there were noticeable differences between them.
+After checking them, I found that they were not obvious data errors. They were all orders with:
 
-### 9. Statistical Analysis
+- Quantity = 5
+- Unit Price around ₹667–₹691
 
-ANOVA was also used to check whether differences between selected groups were statistically meaningful.
+The values were consistent with the rest of the dataset, so I kept them instead of removing them.
 
-The statistical results were interpreted along with the actual business context rather than looking at the numbers in isolation.
+One interesting observation was that **4 of these 8 high-value orders were Cancelled or Returned**.
 
-## Key Findings
+## 7. Correlation Analysis
 
-Some of the main observations from the analysis were:
+I used a correlation matrix and scatter plots to study relationships between numerical variables.
 
-- The average order value was approximately **₹1,053.97**, while the median was approximately **₹823.62**.
-- The order value distribution was **right-skewed**, meaning a smaller number of high-value orders increased the average.
-- **Chair** had the highest total order value at approximately **₹1,95,620.11**.
-- **Printer** was very close to Chair, with approximately **₹1,95,612.61** in order value.
-- Quantity and Total Price showed a positive relationship, with a correlation of approximately **0.615**.
-- Unit Price and Total Price had a stronger positive relationship, with a correlation of approximately **0.717**.
-- Quantity and Items in Cart also showed a noticeable positive relationship, with a correlation of approximately **0.650**.
-- Items in Cart and Total Price had a weaker positive relationship of approximately **0.393**.
-- The IQR analysis identified some high-value orders as statistical outliers, but these were reviewed and retained because they appeared to be valid transactions.
-- The analysis showed differences in order values across products and order-related groups, which provided areas for further investigation.
+Some of the correlations were:
 
-## Business Observations
+- Unit Price ↔ Total Price: **0.717**
+- Quantity ↔ Total Price: **0.615**
+- Quantity ↔ Items in Cart: **0.650**
+- Items in Cart ↔ Total Price: **0.393**
+- Unit Price ↔ Quantity: **0.015**
 
-Based on the EDA, a few areas stood out:
+The important part here was not simply finding a high correlation.
 
-1. High-value orders have a noticeable effect on the overall average order value, so the median should also be considered when describing typical customer orders.
-2. Product-level performance is relatively different, with Chair and Printer contributing the highest order values.
-3. The relationship between quantity and total order value suggests that larger purchases generally contribute to higher order values.
-4. The strong relationship between Unit Price and Total Price is expected because unit price directly contributes to the total order value.
-5. Outliers should not automatically be removed. Some unusually large orders can represent genuine customer purchases.
-6. The differences between groups can be investigated further using statistical tests such as ANOVA.
+Since:
 
-## Recommendations
+`TotalPrice = Quantity × UnitPrice`
 
-Based on the analysis, the following actions could be considered:
+the correlation between Unit Price, Quantity and Total Price is partly mechanical.
 
-- Monitor high-value orders separately when evaluating typical customer spending.
-- Study the reasons behind strong performance of products such as Chair and Printer.
-- Use product-level performance when planning inventory and promotions.
-- Investigate the characteristics of high-value orders to understand what drives larger purchases.
-- Continue monitoring unusual transactions while avoiding unnecessary removal of valid data.
-- Combine EDA results with customer and order-status analysis for deeper business insights.
+The more interesting result was that **Unit Price and Quantity were almost uncorrelated (r ≈ 0.02)** in this dataset.
 
-## What I Learned
+## 8. Relationship and Group Analysis
 
-This project helped me understand that EDA is more than calculating averages and creating graphs.
+I compared order value across:
 
-I learned how to:
+- Products
+- Payment Methods
+- Order Status
+- Coupon usage
+- Referral Sources
 
-- Explore a dataset before making conclusions
-- Use descriptive statistics to understand data
-- Create and interpret visualizations
-- Identify and investigate outliers
-- Study relationships using correlation
-- Compare different groups
-- Use statistical tests such as ANOVA
-- Connect numerical findings with business questions
+I also used ANOVA to check whether differences between groups were statistically significant.
+
+### Product
+
+Chair and Printer were almost tied for the highest total order value.
+
+- Chair: approximately **₹195.6k**
+- Printer: approximately **₹195.6k**
+
+However, the ANOVA result gave **p = 0.62**, so the differences in average order value between products were not statistically significant.
+
+### Payment Method
+
+Credit Card had the highest average order value at around **₹1,128**, while Debit Card was around **₹1,002**.
+
+However, the ANOVA result gave **p = 0.49**, so payment method did not meaningfully explain order value in this dataset.
+
+### Order Status
+
+This was the strongest business finding.
+
+The dataset contains about **₹1.265M in gross order value**, but:
+
+- Around **₹519.7k (41%)** was in Cancelled or Returned orders
+- Around **₹488.8k (39%)** was in Delivered or Shipped orders
+- Around **₹256.3k (20%)** was Pending
+
+The cancellation/return issue was not limited to one product. Every product had a cancellation/return rate above roughly 39%.
+
+This suggests that the issue may be related to the wider ordering, fulfilment or returns process rather than one specific product.
+
+### Coupons and Referral Sources
+
+Coupon users and non-coupon users had fairly similar average order values.
+
+The dataset does not contain discount amounts, so I cannot calculate the actual cost or profitability of the coupon campaigns.
+
+Instagram had the highest order count and order value among the referral sources, but the differences in average order value were not statistically significant.
+
+## Key Takeaways
+
+The main things I took away from the analysis were:
+
+1. **Cancelled and Returned orders are a major issue**, representing about 41% of gross order value.
+2. **The average order value is higher than the median**, so high-value orders are pulling the average upward.
+3. The high-value outliers appear to be **valid orders rather than data errors**, but some of them were also Cancelled or Returned.
+4. **June is the strongest month**, while the second half of the year is generally weaker.
+5. **H1 order value declined across the three years** when comparing January–June on a like-for-like basis.
+6. Product differences exist in total order value, but the statistical test did not show a significant difference in average order value.
+7. Payment method, coupon usage and referral source did not show statistically significant differences in average order value.
+8. Some strong correlations in the data are mechanical because of how `TotalPrice` and `ItemsInCart` are defined.
+9. No single product dominates the business; product shares are relatively close to each other.
+10. The analysis shows that understanding **how a metric is constructed** is just as important as calculating the metric itself.
+
+## Business Recommendations
+
+Based on what the analysis showed, I would focus on:
+
+- Investigating why such a large share of orders are Cancelled or Returned.
+- Looking at the checkout, fulfilment and returns process rather than blaming one particular product.
+- Tracking cancellation reasons in future datasets, since the current dataset does not contain a reason column.
+- Using median order value along with the mean when reporting typical customer spending.
+- Planning inventory and promotions around the stronger first half of the year while investigating the H1 decline.
+- Testing pricing, quantity or bundle strategies rather than assuming that one product or channel is automatically better.
+- Evaluating coupon campaigns using discount cost and order status, not just coupon usage.
+- Using controlled tests before moving significant marketing or business resources based on small group differences.
 
 ## Project Files
 
